@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางออกกำลังกาย 7 วัน</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Workout 7 Days">
+    <meta name="description" content="โปรแกรมออกกำลังกายครบครัน 7 วัน เน้น Cardio, Core และเวทเทรนนิ่ง">
+     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json,{
+        'name': 'ตารางออกกำลังกาย 7 วัน',
+        'short_name': 'Workout 7D',
+        'description': 'โปรแกรมออกกำลังกายครบครัน 7 วัน',
+        'start_url': './',
+        'display': 'standalone',
+        'background_color': '#667eea',
+        'theme_color': '#667eea',
+        'icons': []
+    }">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .slide-container {
+            width: 100%;
+            max-width: 400px;
+            height: 700px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .slide {
+            display: none;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .slide-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .workout-section {
+            margin-bottom: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .exercise-list {
+            list-style: none;
+        }
+
+        .exercise-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .exercise-item.completed {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .exercise-item.completed .exercise-name,
+        .exercise-item.completed .exercise-reps,
+        .exercise-item.completed .exercise-description {
+            color: white;
+        }
+
+        .checkbox {
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .exercise-content {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .exercise-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .exercise-details {
+            flex: 1;
+        }
+
+        .exercise-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .exercise-reps {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .exercise-description {
+            font-size: 11px;
+            color: #777;
+            line-height: 1.3;
+        }
+
+        .video-link {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #ff6b6b;
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            font-size: 11px;
+            transition: background 0.3s ease;
+        }
+
+        .video-link:hover {
+            background: #ff5252;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .dots-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        .slide-counter {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .user-info {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .user-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .rest-day {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .rest-day h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .rest-day p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .congratulations {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .congratulations h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .congratulations p {
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+        }
+
+        .btn-reset {
+            padding: 8px 16px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: #ff5252;
+        }
+
+        .history-section {
+            margin-top: 20px;
+        }
+
+        .history-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .history-data {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .relaxation-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .activity-duration {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .activity-description {
+            color: #777;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .slide-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .exercise-image {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .exercise-name {
+                font-size: 13px;
+            }
+            
+            .exercise-reps {
+                font-size: 11px;
+            }
+            
+            .exercise-description {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1: Home -->
+        <div class="slide active">
+            <div class="slide-header">
+                <div class="slide-title">🏋️ ตารางออกกำลังกาย<br>7 วัน</div>
+            </div>
+            <div class="user-info">
+                <h3>📊 ข้อมูลผู้ใช้</h3>
+                <p><strong>อายุ:</strong> 44 ปี</p>
+                <p><strong>ส่วนสูง:</strong> 165 ซม.</p>
+                <p><strong>น้ำหนักเริ่มต้น:</strong> 68 กก.</p>
+                <p><strong>รอบเอวเริ่มต้น:</strong> 34 นิ้ว</p>
+                <p><strong>เวลาทำงาน:</strong> จ-ส 8:00-21:00</p>
+                <p><strong>เวลาออกกำลังกาย:</strong> เช้า 15-20 นาที</p>
+                <p><strong>IF:</strong> 15:9 (ทำได้ช่วงเช้าก่อนทำงาน)</p>
+            </div>
+            <div class="workout-section">
+                <p style="text-align: center; color: #666; line-height: 1.6;">
+                    โปรแกรมออกกำลังกายครบครัน 7 วัน<br>
+                    เน้น Cardio, Core และเวทเทรนนิ่ง<br>
+                    เหมาะสำหรับการออกกำลังกายช่วงเช้าก่อนทำงาน
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Weight & Waist Tracking -->
+        <div class="slide">
+            <div class="slide-header">
+                <div class="slide-title">📊 บันทึกน้ำหนักและรอบเอว</div>
+            </div>
+            <div class="workout-section">
+                <h3 style="color: #667eea; margin-bottom: 15px;">📝 บันทึกข้อมูลใหม่</h3>
+                <div class="form-group">
+                    <label for="weight">น้ำหนัก (กก.)</label>
+                    <input type="number" id="weight" placeholder="68.0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="waist">รอบเอว (นิ้ว)</label>
+                    <input type="number" id="waist" placeholder="34.0" step="0.1">
+                </div>
+                <button class="btn-primary" onclick="saveTracking()">บันทึกข้อมูล</button>
+            </div>
+            <div class="history-section">
+                <h3>📈 ประวัติการบันทึก</h3>
+                <div id="trackingHistory">
+                    <div style="text-align: center; color: #666; font-size: 12px;">ยังไม่มีข้อมูลการบันทึก</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Day 1 -->
+        <div class="slide" data-day="1">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 1 – Cardio + Core</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-day-1" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text" id="progress-text-day-1">0/6 ท่า</div>
+                <button class="btn-reset" onclick="resetDay(1)">🔄 รีเซ็ตวันนี้</button>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌅 ช่วงเช้า (15 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day1-1">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-1')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/PmwFWhECYpljpnyn.jpg" alt="Jumping Jack" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Jumping Jack</div>
+                                <div class="exercise-reps">100 ครั้ง</div>
+                                <div class="exercise-description">กระโดดกางขา พร้อมยกแขนขึ้นเหนือศีรษะ แล้วกระโดดกลับมาท่าเริ่มต้น ช่วยเพิ่มอัตราการเต้นของหัวใจ</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=jumping+jack+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day1-2">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-2')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/vEhODViBnepajgDk.jpg" alt="Mountain Climber" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Mountain Climber</div>
+                                <div class="exercise-reps">20–30 ครั้ง</div>
+                                <div class="exercise-description">เริ่มจากท่าแป้นค์ สลับเข่าเข้าหาอก เหมือนการวิ่งในท่าแป้นค์ ช่วยเสริมแกนกลางและเผาผลาญแคลอรี่</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=mountain+climber+ท่าปีนเขา+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day1-3">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-3')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/oWNWuZfoXQXRRIKY.jpg" alt="Plank" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Plank</div>
+                                <div class="exercise-reps">30–45 วินาที</div>
+                                <div class="exercise-description">ท่าแป้นค์พื้นฐาน ค้ำตัวด้วยข้อศอกและปลายเท้า เก็บแกนกลางให้แน่น ช่วยเสริมสร้างกล้ามเนื้อหน้าท้องและหลัง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=plank+แป้นค์+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌆 ช่วงเย็น (20–25 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day1-4">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-4')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/pazDHKsvJdKmQlDq.jpg" alt="Leg Raise" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Leg Raise</div>
+                                <div class="exercise-reps">15 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นอนหงาย ยกขาขึ้นตั้งฉากกับพื้น แล้วค่อยๆ ลงโดยไม่ให้เท้าแตะพื้น เน้นกล้ามเนื้อหน้าท้องส่วนล่าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=leg+raise+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day1-5">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-5')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TqiVOOEUVftXmIdM.jpg" alt="Bicycle Crunch" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Bicycle Crunch</div>
+                                <div class="exercise-reps">20 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นอนหงาย สลับข้อศอกแตะเข่าข้างตรงข้าม เหมือนการปั่นจักรยาน ช่วยเสริมกล้ามเนื้อหน้าท้องและข้าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=bicycle+crunch+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day1-6">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day1-6')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/HazwWRdyuyfylyQC.jpg" alt="Ab Wheel" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Ab Wheel</div>
+                                <div class="exercise-reps">8–12 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">ใช้ล้อบริหารหน้าท้อง กลิ้งไปข้างหน้าแล้วกลับ เก็บแกนกลางให้แน่น ท่านี้ท้าทายและมีประสิทธิภาพสูง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=ab+wheel+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: Day 2 -->
+        <div class="slide" data-day="2">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 2 – เวท (Full Body)</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-day-2" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text" id="progress-text-day-2">0/5 ท่า</div>
+                <button class="btn-reset" onclick="resetDay(2)">🔄 รีเซ็ตวันนี้</button>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌅 ช่วงเช้า (15 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day2-1">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day2-1')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TZxnadHxBZQOCGkg.webp" alt="Squat" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Squat</div>
+                                <div class="exercise-reps">15–20 ครั้ง</div>
+                                <div class="exercise-description">ยืนเท้าห่างไหล่ นั่งลงเหมือนนั่งเก้าอี้ เข่าไม่เกินปลายเท้า ช่วยเสริมกล้ามเนื้อขาและสะโพก</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=squat+สควอต+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day2-2">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day2-2')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/ztdUSCOoktOyJTcG.jpg" alt="Push-Up" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Push-Up</div>
+                                <div class="exercise-reps">10–15 ครั้ง</div>
+                                <div class="exercise-description">วิดพื้นพื้นฐาน ลงขึ้นด้วยแขน เก็บลำตัวตรง ช่วยเสริมกล้ามเนื้ออก ไหล่ และแขน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=push+up+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌆 ช่วงเย็น (20–25 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day2-3">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day2-3')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/iTPoHNSeqInZpTgX.jpg" alt="Dumbbell Shoulder Press" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Dumbbell Shoulder Press</div>
+                                <div class="exercise-reps">10–12 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">ยกดัมเบลจากไหล่ขึ้นเหนือศีรษะ ลงช้าๆ ช่วยเสริมกล้ามเนื้อไหล่และแขนส่วนบน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=dumbbell+shoulder+press+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day2-4">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day2-4')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TGybVsrjrghnipno.jpg" alt="Dumbbell Row" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Dumbbell Row</div>
+                                <div class="exercise-reps">10–12 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">โน้มตัวข้างหน้า ดึงดัมเบลขึ้นหาซี่โครง บีบใบไหล่เข้าหากัน ช่วยเสริมกล้ามเนื้อหลังและแขน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=dumbbell+row+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day2-5">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day2-5')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/GTEbVpLwNDPCSJGc.jpg" alt="Glute Bridge" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Glute Bridge</div>
+                                <div class="exercise-reps">15 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นอนหงาย งอเข่า ยกสะโพกขึ้น บีบก้นแน่น ช่วยเสริมกล้ามเนื้อสะโพกและต้นขา</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=glute+bridge+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 5: Day 3 -->
+        <div class="slide" data-day="3">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 3 – Core</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-day-3" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text" id="progress-text-day-3">0/4 ท่า</div>
+                <button class="btn-reset" onclick="resetDay(3)">🔄 รีเซ็ตวันนี้</button>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌅 ช่วงเช้า (15 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day3-1">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day3-1')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/ZBsbqVrqncoKDzeC.png" alt="Standing Toe Touch" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Standing Toe Touch</div>
+                                <div class="exercise-reps">20 ครั้ง</div>
+                                <div class="exercise-description">ยืนตรง โน้มตัวลงแตะปลายเท้า ขึ้นมายืนตรง ช่วยยืดกล้ามเนื้อหลังและขาหลัง พร้อมเสริมแกนกลาง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=standing+toe+touch+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day3-2">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day3-2')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/qxUelTSeSBCsFCqH.jpg" alt="Side Bend" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Side Bend</div>
+                                <div class="exercise-reps">15 ครั้งต่อข้าง</div>
+                                <div class="exercise-description">ยืนตรง เอียงตัวไปข้างซ้ายขวาสลับกัน ช่วยเสริมกล้ามเนื้อข้างลำตัวและเอว</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=side+bend+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌆 ช่วงเย็น (20–25 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day3-3">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day3-3')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/rPifoIKUqNrZAOhc.jpg" alt="Plank to Shoulder Tap" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Plank to Shoulder Tap</div>
+                                <div class="exercise-reps">10–12 ครั้งต่อข้าง</div>
+                                <div class="exercise-description">ท่าแป้นค์ สลับมือแตะไหล่ข้างตรงข้าม เก็บสะโพกไม่ให้โยก ช่วยเสริมความมั่นคงของแกนกลาง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=plank+shoulder+tap+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day3-4">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day3-4')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/memYYDArNoYAfybM.jpg" alt="Russian Twist" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Russian Twist</div>
+                                <div class="exercise-reps">20 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นั่งงอเข่า เอนตัวเล็กน้อย หมุนลำตัวซ้ายขวา ช่วยเสริมกล้ามเนื้อหน้าท้องและข้าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=russian+twist+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Day 4 - Rest Day -->
+        <div class="slide" data-day="4">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 4 – วันพัก</div>
+            </div>
+            <div class="rest-day">
+                <h2>🧘 วันพักผ่อน</h2>
+                <p>วันนี้เป็นวันพักผ่อน ให้ร่างกายได้ฟื้นฟู<br>
+                ดื่มน้ำให้เพียงพอ อย่างน้อย 8-10 แก้ว<br>
+                ทำใจให้ผ่อนคลายและนอนหลับให้เพียงพอ</p>
+            </div>
+        </div>
+
+        <!-- Slide 7: Day 5 - Upper Body -->
+        <div class="slide" data-day="5">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 5 – Upper Body</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-day-5" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text" id="progress-text-day-5">0/6 ท่า</div>
+                <button class="btn-reset" onclick="resetDay(5)">🔄 รีเซ็ตวันนี้</button>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌅 ช่วงเช้า (15-20 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day5-1">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-1')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/ztdUSCOoktOyJTcG.jpg" alt="Push-Up" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Push-Up</div>
+                                <div class="exercise-reps">12-15 ครั้ง</div>
+                                <div class="exercise-description">วิดพื้นพื้นฐาน เน้นกล้ามเนื้ออก ไหล่ และแขน เหมาะสำหรับเริ่มต้นวัน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=push+up+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day5-2">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-2')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/oWNWuZfoXQXRRIKY.jpg" alt="Plank" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Plank</div>
+                                <div class="exercise-reps">45-60 วินาที</div>
+                                <div class="exercise-description">ท่าแป้นค์เพื่อเสริมแกนกลางและเตรียมความพร้อมสำหรับการออกกำลังกายช่วงเย็น</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=plank+แป้นค์+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day5-3">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-3')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/PmwFWhECYpljpnyn.jpg" alt="Jumping Jack" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Jumping Jack</div>
+                                <div class="exercise-reps">50 ครั้ง</div>
+                                <div class="exercise-description">กระโดดกางขาเพื่อเพิ่มอัตราการเต้นของหัวใจและเตรียมร่างกาย</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=jumping+jack+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌆 ช่วงเย็น (25-30 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day5-4">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-4')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/iTPoHNSeqInZpTgX.jpg" alt="Dumbbell Shoulder Press" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Dumbbell Shoulder Press</div>
+                                <div class="exercise-reps">12-15 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">ยกดัมเบลจากไหล่ขึ้นเหนือศีรษะ เน้นกล้ามเนื้อไหล่และแขนส่วนบน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=dumbbell+shoulder+press+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day5-5">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-5')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TGybVsrjrghnipno.jpg" alt="Dumbbell Row" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Dumbbell Row</div>
+                                <div class="exercise-reps">12-15 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">โน้มตัวข้างหน้า ดึงดัมเบลขึ้นหาซี่โครง เน้นกล้ามเนื้อหลังและแขน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=dumbbell+row+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day5-6">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day5-6')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TqiVOOEUVftXmIdM.jpg" alt="Bicycle Crunch" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Bicycle Crunch</div>
+                                <div class="exercise-reps">25 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นอนหงาย สลับข้อศอกแตะเข่าข้างตรงข้าม เสริมกล้ามเนื้อหน้าท้องและข้าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=bicycle+crunch+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Day 6 - Lower Body -->
+        <div class="slide" data-day="6">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 6 – Lower Body</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-day-6" style="width: 0%;"></div>
+                </div>
+                <div class="progress-text" id="progress-text-day-6">0/6 ท่า</div>
+                <button class="btn-reset" onclick="resetDay(6)">🔄 รีเซ็ตวันนี้</button>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌅 ช่วงเช้า (15-20 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day6-1">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-1')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/TZxnadHxBZQOCGkg.webp" alt="Squat" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Squat</div>
+                                <div class="exercise-reps">20-25 ครั้ง</div>
+                                <div class="exercise-description">ยืนเท้าห่างไหล่ นั่งลงเหมือนนั่งเก้าอี้ เตรียมกล้ามเนื้อขาสำหรับวัน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=squat+สควอต+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day6-2">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-2')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/pazDHKsvJdKmQlDq.jpg" alt="Leg Raise" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Leg Raise</div>
+                                <div class="exercise-reps">15 ครั้ง</div>
+                                <div class="exercise-description">นอนหงาย ยกขาขึ้นตั้งฉากกับพื้น เสริมกล้ามเนื้อหน้าท้องส่วนล่าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=leg+raise+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day6-3">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-3')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/vEhODViBnepajgDk.jpg" alt="Mountain Climber" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Mountain Climber</div>
+                                <div class="exercise-reps">30 ครั้ง</div>
+                                <div class="exercise-description">เริ่มจากท่าแป้นค์ สลับเข่าเข้าหาอก เพิ่มอัตราการเต้นของหัวใจ</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=mountain+climber+ท่าปีนเขา+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🌆 ช่วงเย็น (25-30 นาที)</div>
+                <ul class="exercise-list">
+                    <li class="exercise-item" data-exercise="day6-4">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-4')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/GTEbVpLwNDPCSJGc.jpg" alt="Glute Bridge" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Glute Bridge</div>
+                                <div class="exercise-reps">20 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นอนหงาย งอเข่า ยกสะโพกขึ้น บีบก้นแน่น เสริมกล้ามเนื้อสะโพกและต้นขา</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=glute+bridge+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day6-5">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-5')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/memYYDArNoYAfybM.jpg" alt="Russian Twist" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Russian Twist</div>
+                                <div class="exercise-reps">25 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">นั่งงอเข่า เอนตัวเล็กน้อย หมุนลำตัวซ้ายขวา เสริมกล้ามเนื้อหน้าท้องและข้าง</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=russian+twist+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                    <li class="exercise-item" data-exercise="day6-6">
+                        <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day6-6')"></div>
+                        <div class="exercise-content">
+                            <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663167349794/HazwWRdyuyfylyQC.jpg" alt="Ab Wheel" class="exercise-image">
+                            <div class="exercise-details">
+                                <div class="exercise-name">Ab Wheel</div>
+                                <div class="exercise-reps">10-15 ครั้ง x 3 เซ็ต</div>
+                                <div class="exercise-description">ใช้ล้อบริหารหน้าท้อง กลิ้งไปข้างหน้าแล้วกลับ ท่าท้าทายสำหรับจบวัน</div>
+                            </div>
+                        </div>
+                        <a href="https://www.youtube.com/results?search_query=ab+wheel+วิธีทำ+ภาษาไทย" target="_blank" class="video-link">📺 ดูวีดีโอสอน</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: Day 7 - Recovery & Celebration -->
+        <div class="slide" data-day="7">
+            <div class="slide-header">
+                <div class="slide-title">🗓️ วันที่ 7 – พักผ่อนยินดี</div>
+                <div class="progress-text">0/2 กิจกรรม</div>
+            </div>
+            <div class="workout-section">
+                <div class="section-title">🏆 กิจกรรมพักผ่อน</div>
+                <div class="relaxation-activity">
+                    <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day7-1')"></div>
+                    <div class="activity-title">เดินเบาๆ</div>
+                    <div class="activity-duration">15-20 นาที</div>
+                    <div class="activity-description">เดินเบาๆ ในสวนหรือรอบบ้าน ช่วยให้ร่างกายได้เคลื่อนไหวเบาๆ และเสริมการฟื้นฟู</div>
+                </div>
+                <div class="relaxation-activity">
+                    <div class="checkbox"><input type="checkbox" onchange="updateProgress(this, 'day7-2')"></div>
+                    <div class="activity-title">ยืดเส้นยืดสาย</div>
+                    <div class="activity-duration">10-15 นาที</div>
+                    <div class="activity-description">ยืดกล้ามเนื้อเบาๆ ช่วยให้กล้ามเนื้อผ่อนคลาย ลดความตึงเครียด และเตรียมพร้อมสำหรับสัปดาห์ใหม่</div>
+                </div>
+            </div>
+            <div class="congratulations">
+                <h3>🎉 ยินดีด้วย!</h3>
+                <p>คุณได้ทำครบ 7 วันแล้ว!<br>
+                พักผ่อนให้เพียงพอและเตรียมตัวสำหรับรอบใหม่<br>
+                อย่าลืมติดตามน้ำหนักและรอบเอวเพื่อดูความเปลี่ยนแปลง</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">◀ ก่อนหน้า</button>
+            <div class="dots-container">
+                <div class="dot active" onclick="showSlide(0)"></div>
+                <div class="dot" onclick="showSlide(1)"></div>
+                <div class="dot" onclick="showSlide(2)"></div>
+                <div class="dot" onclick="showSlide(3)"></div>
+                <div class="dot" onclick="showSlide(4)"></div>
+                <div class="dot" onclick="showSlide(5)"></div>
+                <div class="dot" onclick="showSlide(6)"></div>
+                <div class="dot" onclick="showSlide(7)"></div>
+                <div class="dot" onclick="showSlide(8)"></div>
+            </div>
+            <div class="slide-counter">
+                <span id="currentSlide">1</span>/<span id="totalSlides">9</span>
+            </div>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">ถัดไป ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = slides.length;
+        
+        // Exercise counts for each day
+        const exerciseCounts = {
+            1: 6, // Day 1: Cardio + Core
+            2: 5, // Day 2: Full Body
+            3: 4, // Day 3: Core
+            4: 0, // Day 4: Rest
+            5: 6, // Day 5: Upper Body
+            6: 6, // Day 6: Lower Body
+            7: 2  // Day 7: Recovery
+        };
+
+        // Progress tracking functions
+        function updateProgress(checkbox, exerciseId) {
+            const item = checkbox.closest('.exercise-item');
+            const dayMatch = exerciseId.match(/day(\d+)/);
+            
+            if (!dayMatch) return;
+            
+            const day = parseInt(dayMatch[1]);
+            
+            if (checkbox.checked) {
+                item.classList.add('completed');
+            } else {
+                item.classList.remove('completed');
+            }
+            
+            updateDayProgress(day);
+            saveProgress();
+        }
+
+        function updateDayProgress(day) {
+            const totalExercises = exerciseCounts[day];
+            if (totalExercises === 0) return; // Skip rest days
+            
+            let completedCount = 0;
+            
+            // Count completed exercises for this day
+            for (let ex = 1; ex <= totalExercises; ex++) {
+                const exerciseId = `day${day}-${ex}`;
+                const checkbox = document.querySelector(`[data-exercise="${exerciseId}"] input`);
+                if (checkbox && checkbox.checked) {
+                    completedCount++;
+                }
+            }
+            
+            const percentage = (completedCount / totalExercises) * 100;
+            
+            // Update progress bar
+            const progressBar = document.getElementById(`progress-day-${day}`);
+            const progressText = document.getElementById(`progress-text-day-${day}`);
+            
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${completedCount}/${totalExercises} ท่า`;
+            }
+        }
+
+        function saveProgress() {
+            const progress = {};
+            
+            // Save all checkbox states
+            document.querySelectorAll('.exercise-item input[type="checkbox"]').forEach(checkbox => {
+                const exerciseItem = checkbox.closest('.exercise-item');
+                const exerciseId = exerciseItem.getAttribute('data-exercise');
+                if (exerciseId) {
+                    progress[exerciseId] = checkbox.checked;
+                }
+            });
+            
+            localStorage.setItem('workoutProgress', JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('workoutProgress');
+            if (!savedProgress) return;
+            
+            const progress = JSON.parse(savedProgress);
+            
+            // Restore checkbox states
+            Object.keys(progress).forEach(exerciseId => {
+                const checkbox = document.querySelector(`[data-exercise="${exerciseId}"] input`);
+                const item = document.querySelector(`[data-exercise="${exerciseId}"]`);
+                
+                if (checkbox && item) {
+                    checkbox.checked = progress[exerciseId];
+                    if (progress[exerciseId]) {
+                        item.classList.add('completed');
+                    }
+                }
+            });
+            
+            // Update all day progress bars
+            for (let day = 1; day <= 7; day++) {
+                updateDayProgress(day);
+            }
+        }
+
+        function resetDay(day) {
+            const totalExercises = exerciseCounts[day];
+            
+            // Reset checkboxes and visual states for this day
+            for (let ex = 1; ex <= totalExercises; ex++) {
+                const exerciseId = `day${day}-${ex}`;
+                const checkbox = document.querySelector(`[data-exercise="${exerciseId}"] input`);
+                const item = document.querySelector(`[data-exercise="${exerciseId}"]`);
+                
+                if (checkbox && item) {
+                    checkbox.checked = false;
+                    item.classList.remove('completed');
+                }
+            }
+            
+            updateDayProgress(day);
+            saveProgress();
+            
+            // Show success message in a more compatible way
+            const resetBtn = document.querySelector(`[data-day="${day}"] .btn-reset`);
+            if (resetBtn) {
+                const originalText = resetBtn.textContent;
+                resetBtn.textContent = '✅ รีเซ็ตแล้ว!';
+                resetBtn.style.backgroundColor = '#4CAF50';
+                setTimeout(() => {
+                    resetBtn.textContent = originalText;
+                    resetBtn.style.backgroundColor = '';
+                }, 2000);
+            }
+        }
+
+        function resetAll() {
+            if (confirm('คุณต้องการรีเซ็ตความคืบหน้าทั้งหมดหรือไม่?')) {
+                localStorage.removeItem('workoutProgress');
+                
+                // Reset all checkboxes and visual states
+                for (let day = 1; day <= 7; day++) {
+                    for (let ex = 1; ex <= exerciseCounts[day]; ex++) {
+                        const exerciseId = `day${day}-${ex}`;
+                        const checkbox = document.querySelector(`[data-exercise="${exerciseId}"] input`);
+                        const item = document.querySelector(`[data-exercise="${exerciseId}"]`);
+                        if (checkbox && item) {
+                            checkbox.checked = false;
+                            item.classList.remove('completed');
+                        }
+                    }
+                    updateDayProgress(day);
+                }
+                
+                alert('รีเซ็ตความคืบหน้าเรียบร้อยแล้ว!');
+            }
+        }
+
+        // Weight and Waist Tracking Functions
+        function saveTracking() {
+            const weight = document.getElementById('weight').value;
+            const waist = document.getElementById('waist').value;
+            
+            if (!weight || !waist) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+            
+            const today = new Date().toLocaleDateString('th-TH');
+            const trackingData = JSON.parse(localStorage.getItem('trackingData') || '[]');
+            
+            // Check if today's data already exists
+            const existingIndex = trackingData.findIndex(item => item.date === today);
+            
+            const newData = {
+                date: today,
+                weight: parseFloat(weight),
+                waist: parseFloat(waist)
+            };
+            
+            if (existingIndex >= 0) {
+                trackingData[existingIndex] = newData;
+            } else {
+                trackingData.push(newData);
+            }
+            
+            // Keep only last 30 records
+            if (trackingData.length > 30) {
+                trackingData.splice(0, trackingData.length - 30);
+            }
+            
+            localStorage.setItem('trackingData', JSON.stringify(trackingData));
+            
+            // Clear form
+            document.getElementById('weight').value = '';
+            document.getElementById('waist').value = '';
+            
+            // Refresh history display
+            loadTrackingHistory();
+            
+            alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
+        }
+
+        function loadTrackingHistory() {
+            const trackingData = JSON.parse(localStorage.getItem('trackingData') || '[]');
+            const historyContainer = document.getElementById('trackingHistory');
+            
+            if (trackingData.length === 0) {
+                historyContainer.innerHTML = '<div style="text-align: center; color: #666; font-size: 12px;">ยังไม่มีข้อมูลการบันทึก</div>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            trackingData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            historyContainer.innerHTML = trackingData.slice(0, 10).map(item => `
+                <div class="history-item">
+                    <div class="history-date">${item.date}</div>
+                    <div class="history-data">น้ำหนัก: ${item.weight} กก. | รอบเอว: ${item.waist} นิ้ว</div>
+                </div>
+            `).join('');
+        }
+
+        function showSlide(index) {
+            // Hide all slides
+            for(let i = 0; i < slides.length; i++) {
+                slides[i].style.display = 'none';
+                slides[i].classList.remove('active');
+            }
+            
+            // Hide all dots
+            for(let i = 0; i < dots.length; i++) {
+                dots[i].classList.remove('active');
+            }
+            
+            // Show selected slide
+            slides[index].style.display = 'block';
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            
+            // Update counter
+            document.getElementById('currentSlide').textContent = index + 1;
+            document.getElementById('totalSlides').textContent = totalSlides;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').disabled = index === totalSlides - 1;
+            
+            currentSlideIndex = index;
+        }
+
+        function changeSlide(direction) {
+            currentSlideIndex += direction;
+            
+            if (currentSlideIndex < 0) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex >= totalSlides) {
+                currentSlideIndex = totalSlides - 1;
+            }
+            
+            showSlide(currentSlideIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeSlide(1);
+            }
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                changeSlide(1); // Swipe left - next slide
+            }
+            if (touchEndX > touchStartX + 50) {
+                changeSlide(-1); // Swipe right - previous slide
+            }
+        }
+
+        // Initialize
+        showSlide(0);
+        loadProgress();
+        loadTrackingHistory();
+    </script>
+</body>
+</html>
+
